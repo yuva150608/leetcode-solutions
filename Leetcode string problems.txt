@@ -1,0 +1,217 @@
+                                                      LEETCODE PROBLEMS
+STRINGS:
+
+1) Longest substring without repeating characters
+
+Python:
+
+
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        char_map = {}
+        left = 0
+        max_len = 0
+        
+        for right in range(len(s)):
+            # If character is already in the window, move the left pointer
+            if s[right] in char_map and char_map[s[right]] >= left:
+                left = char_map[s[right]] + 1
+            
+            # Update the character's last seen index
+            char_map[s[right]] = right
+            # Calculate current window size and update max_len
+            max_len = max(max_len, right - left + 1)
+            
+        return max_len
+2)Longest Palindromic Substring
+
+Python:
+class Solution:
+    def longestPalindrome(self, s: str) -> str:
+        if not s:
+            return ""
+        
+        def expand(l, r):
+            while l >= 0 and r < len(s) and s[l] == s[r]:
+                l -= 1
+                r += 1
+            # Return the valid palindromic substring
+            return s[l + 1:r]
+
+        res = ""
+        for i in range(len(s)):
+            # Case 1: Odd length (e.g., "aba", center is 'b')
+            p1 = expand(i, i)
+            # Case 2: Even length (e.g., "abba", center is between 'b's)
+            p2 = expand(i, i + 1)
+            # Update the longest result found so far
+            res = max(res, p1, p2, key=len)
+            
+        return res
+
+3)Zigzag Conversion
+
+Python:
+class Solution:
+    def convert(self, s: str, numRows: int) -> str:
+        if numRows == 1 or numRows >= len(s):
+            return s
+        
+        rows = [''] * numRows
+        index, step = 0, 1
+        
+        for char in s:
+            rows[index] += char
+            # Change direction if at first or last row
+            if index == 0:
+                step = 1
+            elif index == numRows - 1:
+                step = -1
+            index += step
+            
+        return "".join(rows)
+
+
+4)String to Integer(atoi)
+
+Python:
+class Solution:
+    def myAtoi(self, s: str) -> int:
+        s = s.lstrip() # Remove leading whitespace
+        if not s: return 0
+        
+        sign = -1 if s[0] == '-' else 1
+        if s[0] in ('-', '+'): s = s[1:]
+        
+        res = 0
+        for char in s:
+            if not char.isdigit(): break
+            res = res * 10 + int(char)
+            
+        # Clamp the result
+        res = sign * res
+        return max(-2**31, min(res, 2**31 - 1))
+
+5)Regular Expression Matching
+Python:
+class Solution:
+    def isMatch(self, s: str, p: str) -> bool:
+        memo = {}
+
+        def dp(i, j):
+            if (i, j) in memo: return memo[(i, j)]
+            if j == len(p): return i == len(s)
+
+            # Check if current characters match
+            first_match = i < len(s) and (p[j] == s[i] or p[j] == '.')
+
+            if j + 1 < len(p) and p[j+1] == '*':
+                # Case 1: Skip '*' and the preceding char (0 occurrences)
+                # Case 2: Use '*' if there's a match (1 or more occurrences)
+                ans = dp(i, j + 2) or (first_match and dp(i + 1, j))
+            else:
+                # No '*' involved, move both pointers forward
+                ans = first_match and dp(i + 1, j + 1)
+
+            memo[(i, j)] = ans
+            return ans
+
+        return dp(0, 0)
+
+6)Integer to Roman
+
+Python:
+class Solution:
+    def intToRoman(self, num: int) -> str:
+        # Map values to their Roman symbols in descending order
+        val_syms = [
+            (1000, "M"), (900, "CM"), (500, "D"), (400, "CD"),
+            (100, "C"), (90, "XC"), (50, "L"), (40, "XL"),
+            (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")
+        ]
+        res = []
+        for val, sym in val_syms:
+            if num == 0: break
+            count, num = divmod(num, val)
+            res.append(sym * count)
+            
+        return "".join(res)
+
+7)Roman to Integer
+
+Python:
+class Solution:
+    def romanToInt(self, s: str) -> int:
+        roman_map = {
+            'I': 1, 'V': 5, 'X': 10, 'L': 50,
+            'C': 100, 'D': 500, 'M': 1000
+        }
+        total = 0
+        for i in range(len(s)):
+            # If current value is less than the next, subtract it
+            if i + 1 < len(s) and roman_map[s[i]] < roman_map[s[i+1]]:
+                total -= roman_map[s[i]]
+            else:
+                total += roman_map[s[i]]
+        return total
+
+8)Longest Common Prefix
+
+Python:
+class Solution:
+    def longestCommonPrefix(self, strs: List[str]) -> str:
+        if not strs:
+            return ""
+        
+        prefix = strs[0]
+        for i in range(1, len(strs)):
+            # Trim prefix until it matches the start of strs[i]
+            while not strs[i].startswith(prefix):
+                prefix = prefix[:-1]
+                if not prefix:
+                    return ""
+        return prefix
+
+9)Letter Combinations of a phone number
+Python:
+class Solution:
+    def letterCombinations(self, digits: str) -> List[str]:
+        if not digits:
+            return []
+        
+        phone = {
+            "2": "abc", "3": "def", "4": "ghi", "5": "jkl", 
+            "6": "mno", "7": "pqrs", "8": "tuv", "9": "wxyz"
+        }
+        res = []
+        
+        def backtrack(index, path):
+            if len(path) == len(digits):
+                res.append("".join(path))
+                return
+            
+            for letter in phone[digits[index]]:
+                path.append(letter)
+                backtrack(index + 1, path)
+                path.pop() # Backtrack to try next letter
+        
+        backtrack(0, [])
+        return res
+10)Valid Parentheses
+Python:
+class Solution:
+    def isValid(self, s: str) -> bool:
+        stack = []
+        mapping = {")": "(", "}": "{", "]": "["}
+        
+        for char in s:
+            if char in mapping:
+                # Pop the top element if stack isn't empty, else use dummy
+                top_element = stack.pop() if stack else '#'
+                if mapping[char] != top_element:
+                    return False
+            else:
+                # It's an opening bracket, push to stack
+                stack.append(char)
+        
+        return not stack
